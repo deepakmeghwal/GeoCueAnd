@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="datastore" />
+        <exclude domain="database" path="geocue.db" />
+    </cloud-backup>
+</data-extraction-rules>

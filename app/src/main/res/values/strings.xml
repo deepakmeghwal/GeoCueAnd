@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">GeoCue</string>
+    <string name="maps_api_key">ADD_YOUR_KEY_HERE</string>
+    <string name="permission_rationale_location">GeoCue relies on location services to trigger reminders when you arrive or leave saved places.</string>
+    <string name="permission_rationale_notifications">Enable notifications so GeoCue can alert you for location reminders.</string>
+    <string name="permission_settings_action">Open Settings</string>
+    <string name="permission_retry_action">Try Again</string>
+    <string name="no_reminders_title">No reminders yet</string>
+    <string name="no_reminders_message">Create your first location reminder to get started.</string>
+    <string name="add_reminder">Add Reminder</string>
+    <string name="home_tab">Home</string>
+    <string name="map_tab">Map</string>
+    <string name="settings_tab">Settings</string>
+    <string name="active_reminders">Active Reminders</string>
+    <string name="inactive_reminders">Inactive Reminders</string>
+    <string name="location_services_disabled">Location services are disabled. Enable them in Settings.</string>
+    <string name="geofencing_requires_always">GeoCue needs background location to monitor reminders. Grant "Allow all the time" access in Settings.</string>
+</resources>
