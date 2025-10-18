@@ -12,11 +12,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -43,6 +46,7 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberMarkerState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,6 +74,7 @@ fun AddReminderSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -233,7 +238,7 @@ private fun SearchResultsSection(
                             onClick = { onSelectResult(result) }
                         )
                         if (index < state.results.lastIndex) {
-                            Divider()
+                            HorizontalDivider()
                         }
                     }
                 }
@@ -306,12 +311,12 @@ private fun MapPreview(
         ) {
             state.selectedLocation?.let { selection ->
                 val center = LatLng(selection.latitude, selection.longitude)
-                Marker(position = center, title = selection.name)
+                Marker(state = rememberMarkerState(position = center), title = selection.name)
                 Circle(
                     center = center,
                     radius = state.radius.toDouble(),
-                    fillColor = 0x332196F3,
-                    strokeColor = 0xFF2196F3.toInt(),
+                    fillColor = Color(0x332196F3),
+                    strokeColor = Color(0xFF2196F3.toInt()),
                     strokeWidth = 2f
                 )
             }

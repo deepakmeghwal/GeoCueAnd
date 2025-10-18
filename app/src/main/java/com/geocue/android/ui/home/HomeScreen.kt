@@ -3,11 +3,13 @@ package com.geocue.android.ui.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -139,7 +141,7 @@ private fun GeofenceCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(12.dp))
-            androidx.compose.foundation.layout.Row(
+            Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -165,7 +167,7 @@ private fun PermissionBanner() {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(imageVector = Icons.Outlined.LocationOff, contentDescription = null)
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
@@ -175,7 +177,7 @@ private fun PermissionBanner() {
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "GeoCue needs "Allow all the time" access to trigger reminders while the app is closed.",
+                text = "GeoCue needs \"Allow all the time\" access to trigger reminders while the app is closed.",
                 style = MaterialTheme.typography.bodySmall
             )
         }
