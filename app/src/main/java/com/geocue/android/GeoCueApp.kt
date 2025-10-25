@@ -9,12 +9,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,12 +40,16 @@ import com.geocue.android.ui.home.GeofenceListViewModel
 import com.geocue.android.ui.home.HomeScreen
 import com.geocue.android.ui.map.MapScreen
 import com.geocue.android.ui.map.MapViewModel
+import com.geocue.android.ui.notifications.NotificationHistorySheet
 import com.geocue.android.ui.settings.SettingsScreen
 import com.geocue.android.ui.settings.SettingsViewModel
 import com.geocue.android.ui.theme.GeoCueTheme
+import com.geocue.android.ui.notifications.NotificationHistoryViewModel
+import java.util.UUID
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.launch
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun GeoCueApp() {
     GeoCueTheme {
@@ -114,8 +123,12 @@ fun GeoCueApp() {
         val addReminderViewModel: AddReminderViewModel = hiltViewModel()
         val addReminderState by addReminderViewModel.state.collectAsStateWithLifecycle()
 
+        val notificationHistoryViewModel: NotificationHistoryViewModel = hiltViewModel()
+        val notificationHistoryState by notificationHistoryViewModel.uiState.collectAsStateWithLifecycle()
+
         var showAddReminder by rememberSaveable { mutableStateOf(false) }
         var editingReminder by remember { mutableStateOf<GeofenceLocation?>(null) }
+        var showNotificationHistory by rememberSaveable { mutableStateOf(false) }
 
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -147,6 +160,8 @@ fun GeoCueApp() {
                         addReminderViewModel.loadReminderForEditing(location)
                         showAddReminder = true
                     },
+                    onShowNotificationHistory = { showNotificationHistory = true },
+                    notificationCount = notificationHistoryState.notificationGroups.sumOf { it.items.size },
                     modifier = Modifier.padding(innerPadding)
                 )
                 "map" -> MapScreen(
@@ -212,6 +227,16 @@ fun GeoCueApp() {
                 onUseCurrentLocation = addReminderViewModel::useCurrentLocation,
                 onSelectCoordinates = addReminderViewModel::selectCoordinates,
                 editingReminder = editingReminder
+            )
+        }
+
+        if (showNotificationHistory) {
+            NotificationHistorySheet(
+                onDismiss = { showNotificationHistory = false },
+                notifications = notificationHistoryState.notificationGroups,
+                isLoading = notificationHistoryState.isLoading,
+                onClearAll = { notificationHistoryViewModel.clearAllNotifications() },
+                onDeleteOld = { notificationHistoryViewModel.deleteOldNotifications() }
             )
         }
     }

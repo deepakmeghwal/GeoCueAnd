@@ -19,13 +19,19 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.LocationOff
 import androidx.compose.material.icons.outlined.NotificationsActive
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +42,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.geocue.android.domain.model.GeofenceLocation
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     state: GeofenceListUiState,
@@ -43,48 +50,87 @@ fun HomeScreen(
     onToggleReminder: (GeofenceLocation, Boolean) -> Unit,
     onDeleteReminder: (GeofenceLocation) -> Unit,
     onEditReminder: (GeofenceLocation) -> Unit,
+    onShowNotificationHistory: () -> Unit = {},
+    notificationCount: Int = 0,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
-        ) {
-            if (!state.canMonitorInBackground) {
-                PermissionBanner()
-            }
-
-            if (state.active.isEmpty() && state.inactive.isEmpty()) {
-                EmptyState(onAddTapped = onAddReminderClick)
-            } else {
-                ReminderSection(
-                    title = "Active reminders",
-                    reminders = state.active,
-                    onToggle = onToggleReminder,
-                    onDelete = onDeleteReminder,
-                    onEdit = onEditReminder
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                ReminderSection(
-                    title = "Inactive reminders",
-                    reminders = state.inactive,
-                    onToggle = onToggleReminder,
-                    onDelete = onDeleteReminder,
-                    onEdit = onEditReminder
-                )
-            }
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = "GeoCue",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
+                actions = {
+                    IconButton(onClick = onShowNotificationHistory) {
+                        BadgedBox(
+                            badge = {
+                                if (notificationCount > 0) {
+                                    Badge {
+                                        Text(
+                                            text = notificationCount.toString(),
+                                            fontSize = MaterialTheme.typography.labelSmall.fontSize
+                                        )
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Notifications,
+                                contentDescription = "Notifications"
+                            )
+                        }
+                    }
+                }
+            )
         }
+    ) { innerPadding ->
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
+            ) {
+                if (!state.canMonitorInBackground) {
+                    PermissionBanner()
+                }
 
-        FloatingActionButton(
-            onClick = onAddReminderClick,
-            modifier = Modifier
-                .padding(16.dp)
-                .align(Alignment.BottomEnd)
-        ) {
-            Icon(imageVector = Icons.Outlined.Add, contentDescription = null)
+                if (state.active.isEmpty() && state.inactive.isEmpty()) {
+                    EmptyState(onAddTapped = onAddReminderClick)
+                } else {
+                    ReminderSection(
+                        title = "Active reminders",
+                        reminders = state.active,
+                        onToggle = onToggleReminder,
+                        onDelete = onDeleteReminder,
+                        onEdit = onEditReminder
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    ReminderSection(
+                        title = "Inactive reminders",
+                        reminders = state.inactive,
+                        onToggle = onToggleReminder,
+                        onDelete = onDeleteReminder,
+                        onEdit = onEditReminder
+                    )
+                }
+            }
+
+            FloatingActionButton(
+                onClick = onAddReminderClick,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .align(Alignment.BottomEnd)
+            ) {
+                Icon(imageVector = Icons.Outlined.Add, contentDescription = null)
+            }
         }
     }
 }
