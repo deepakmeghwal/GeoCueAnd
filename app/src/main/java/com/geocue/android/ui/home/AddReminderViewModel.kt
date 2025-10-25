@@ -5,6 +5,7 @@ import android.location.Address
 import android.location.Geocoder
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geocue.android.domain.model.GeofenceLocation
 import com.geocue.android.location.AndroidLocationClient
 import com.geocue.android.permissions.PermissionChecker
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -157,6 +158,24 @@ class AddReminderViewModel @Inject constructor(
 
     fun reset() {
         _state.value = AddReminderUiState(currentLocation = _state.value.currentLocation)
+    }
+
+    fun loadReminderForEditing(reminder: GeofenceLocation) {
+        _state.value = AddReminderUiState(
+            name = reminder.name,
+            selectedLocation = PlaceSearchResult(
+                name = reminder.name,
+                address = reminder.address.takeIf { it.isNotBlank() },
+                latitude = reminder.latitude,
+                longitude = reminder.longitude
+            ),
+            radius = reminder.radius,
+            entryMessage = reminder.entryMessage,
+            exitMessage = reminder.exitMessage,
+            notifyOnEntry = reminder.notifyOnEntry,
+            notifyOnExit = reminder.notifyOnExit,
+            currentLocation = _state.value.currentLocation
+        )
     }
 
     fun selectCoordinates(latitude: Double, longitude: Double) {

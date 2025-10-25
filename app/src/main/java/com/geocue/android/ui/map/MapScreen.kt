@@ -59,7 +59,7 @@ fun MapScreen(
         FloatingActionButton(
             onClick = onCenterOnUser,
             modifier = Modifier
-                .align(Alignment.BottomEnd)
+                .align(Alignment.TopEnd)
                 .padding(16.dp)
         ) {
             Icon(imageVector = Icons.Outlined.MyLocation, contentDescription = null)

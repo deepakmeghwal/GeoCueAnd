@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.geocue.android.domain.model.GeofenceLocation
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -63,7 +64,8 @@ fun AddReminderSheet(
     onToggleEntry: (Boolean) -> Unit,
     onToggleExit: (Boolean) -> Unit,
     onUseCurrentLocation: () -> Unit,
-    onSelectCoordinates: (Double, Double) -> Unit
+    onSelectCoordinates: (Double, Double) -> Unit,
+    editingReminder: GeofenceLocation? = null
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -79,7 +81,7 @@ fun AddReminderSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Create reminder",
+                text = if (editingReminder != null) "Edit reminder" else "Create reminder",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )

@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.LocationOff
 import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material3.Card
@@ -41,6 +42,7 @@ fun HomeScreen(
     onAddReminderClick: () -> Unit,
     onToggleReminder: (GeofenceLocation, Boolean) -> Unit,
     onDeleteReminder: (GeofenceLocation) -> Unit,
+    onEditReminder: (GeofenceLocation) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
@@ -60,7 +62,8 @@ fun HomeScreen(
                     title = "Active reminders",
                     reminders = state.active,
                     onToggle = onToggleReminder,
-                    onDelete = onDeleteReminder
+                    onDelete = onDeleteReminder,
+                    onEdit = onEditReminder
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -69,7 +72,8 @@ fun HomeScreen(
                     title = "Inactive reminders",
                     reminders = state.inactive,
                     onToggle = onToggleReminder,
-                    onDelete = onDeleteReminder
+                    onDelete = onDeleteReminder,
+                    onEdit = onEditReminder
                 )
             }
         }
@@ -91,6 +95,7 @@ private fun ReminderSection(
     reminders: List<GeofenceLocation>,
     onToggle: (GeofenceLocation, Boolean) -> Unit,
     onDelete: (GeofenceLocation) -> Unit,
+    onEdit: (GeofenceLocation) -> Unit,
 ) {
     if (reminders.isEmpty()) return
 
@@ -102,7 +107,7 @@ private fun ReminderSection(
 
     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         items(reminders, key = { it.id }) { reminder ->
-            GeofenceCard(reminder = reminder, onToggle = onToggle, onDelete = onDelete)
+            GeofenceCard(reminder = reminder, onToggle = onToggle, onDelete = onDelete, onEdit = onEdit)
         }
     }
 }
@@ -112,6 +117,7 @@ private fun GeofenceCard(
     reminder: GeofenceLocation,
     onToggle: (GeofenceLocation, Boolean) -> Unit,
     onDelete: (GeofenceLocation) -> Unit,
+    onEdit: (GeofenceLocation) -> Unit,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -150,6 +156,9 @@ private fun GeofenceCard(
                     onCheckedChange = { onToggle(reminder, it) }
                 )
                 Spacer(modifier = Modifier.weight(1f))
+                IconButton(onClick = { onEdit(reminder) }) {
+                    Icon(imageVector = Icons.Outlined.Edit, contentDescription = "Edit reminder")
+                }
                 IconButton(onClick = { onDelete(reminder) }) {
                     Icon(imageVector = Icons.Outlined.Delete, contentDescription = "Delete reminder")
                 }

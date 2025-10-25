@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.geocue.android.domain.model.GeofenceLocation
 import com.geocue.android.permissions.PermissionChecker
 import com.geocue.android.ui.home.AddReminderSheet
 import com.geocue.android.ui.home.AddReminderViewModel
@@ -114,6 +115,7 @@ fun GeoCueApp() {
         val addReminderState by addReminderViewModel.state.collectAsStateWithLifecycle()
 
         var showAddReminder by rememberSaveable { mutableStateOf(false) }
+        var editingReminder by remember { mutableStateOf<GeofenceLocation?>(null) }
 
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -140,6 +142,11 @@ fun GeoCueApp() {
                     },
                     onToggleReminder = { location, enabled -> homeViewModel.toggleEnabled(location, enabled) },
                     onDeleteReminder = { location -> homeViewModel.delete(location) },
+                    onEditReminder = { location ->
+                        editingReminder = location
+                        addReminderViewModel.loadReminderForEditing(location)
+                        showAddReminder = true
+                    },
                     modifier = Modifier.padding(innerPadding)
                 )
                 "map" -> MapScreen(
@@ -160,13 +167,33 @@ fun GeoCueApp() {
                 state = addReminderState,
                 onDismiss = {
                     showAddReminder = false
+                    editingReminder = null
                     addReminderViewModel.reset()
                 },
                 onConfirm = {
                     val request = addReminderViewModel.buildRequest()
                     if (request != null) {
-                        homeViewModel.addReminder(request)
+                        if (editingReminder != null) {
+                            // Update existing reminder
+                            homeViewModel.updateReminder(
+                                editingReminder!!.copy(
+                                    name = request.name,
+                                    address = request.address,
+                                    latitude = request.latitude ?: editingReminder!!.latitude,
+                                    longitude = request.longitude ?: editingReminder!!.longitude,
+                                    radius = request.radius,
+                                    entryMessage = request.entryMessage,
+                                    exitMessage = request.exitMessage,
+                                    notifyOnEntry = request.notifyOnEntry,
+                                    notifyOnExit = request.notifyOnExit
+                                )
+                            )
+                        } else {
+                            // Create new reminder
+                            homeViewModel.addReminder(request)
+                        }
                         showAddReminder = false
+                        editingReminder = null
                         addReminderViewModel.reset()
                     } else {
                         scope.launch {
@@ -183,7 +210,8 @@ fun GeoCueApp() {
                 onToggleEntry = addReminderViewModel::toggleNotifyOnEntry,
                 onToggleExit = addReminderViewModel::toggleNotifyOnExit,
                 onUseCurrentLocation = addReminderViewModel::useCurrentLocation,
-                onSelectCoordinates = addReminderViewModel::selectCoordinates
+                onSelectCoordinates = addReminderViewModel::selectCoordinates,
+                editingReminder = editingReminder
             )
         }
     }
