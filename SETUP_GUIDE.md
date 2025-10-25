@@ -7,6 +7,38 @@
 - [x] Android SDK 34 toolchain
 - [x] Project builds successfully
 
+## ⚡ Quick Commands
+
+```bash
+# Navigate to project
+cd /Users/dmeghwal/Documents/myDocs/repo/GeoCueAnd/GeoCueAnd
+
+# Clean build
+./gradlew clean
+
+# Build debug APK
+./gradlew assembleDebug
+
+# Clean + Rebuild
+./gradlew clean assembleDebug
+
+ #  Clean + Rebuild + Install and run app locally
+./gradlew clean assembleDebug installDebug
+
+# Start emulator (replace with your AVD name)
+$ANDROID_HOME/emulator/emulator -avd Medium_Phone_API_36.1 &
+
+# Install and run app locally
+./gradlew installDebug
+
+# Generate release APK
+./gradlew assembleRelease
+
+# Output locations:
+# Debug APK: app/build/outputs/apk/debug/app-debug.apk
+# Release APK: app/build/outputs/apk/release/app-release-unsigned.apk
+```
+
 ## 🚀 Quick Start - Running the App
 
 ### Option 1: Using Android Studio (Recommended)
@@ -79,6 +111,95 @@ The APK will be generated at:
 #### C. Build and Install in One Step
 ```bash
 ./gradlew :app:installDebug
+```
+
+### 📱 Setting Up and Starting an Emulator
+
+If you don't have a physical device, you can use an Android emulator from the command line:
+
+#### 1. Check Available Emulators
+```bash
+# List all available Android Virtual Devices (AVDs)
+$ANDROID_HOME/emulator/emulator -list-avds
+
+# Or with full path on macOS:
+/Users/dmeghwal/Library/Android/sdk/emulator/emulator -list-avds
+```
+
+Example output:
+```
+Medium_Phone_API_36.1
+Pixel_5_API_34
+```
+
+#### 2. Start an Emulator
+```bash
+# Start an emulator (replace with your AVD name)
+$ANDROID_HOME/emulator/emulator -avd Medium_Phone_API_36.1 &
+
+# Or with full path:
+/Users/dmeghwal/Library/Android/sdk/emulator/emulator -avd Medium_Phone_API_36.1 &
+```
+
+**Note:** The `&` at the end runs the emulator in the background.
+
+#### 3. Wait for Emulator to Boot
+The emulator takes 30-60 seconds to fully boot. You can check the status:
+
+```bash
+# Check if device is detected
+adb devices
+
+# Output when ready:
+# List of devices attached
+# emulator-5554    device
+```
+
+**Status meanings:**
+- `offline` - Emulator is starting up, wait a bit longer
+- `device` - Emulator is ready! ✅
+- Empty list - Emulator hasn't been detected yet
+
+#### 4. Verify Connection
+Once you see `device` status, you can install and run your app:
+
+```bash
+# Install the app
+./gradlew :app:installDebug
+
+# Or install manually
+adb install app/build/outputs/apk/debug/app-debug.apk
+
+# Launch the app
+adb shell am start -n com.geocue.android.debug/com.geocue.android.MainActivity
+```
+
+#### Troubleshooting Emulator Issues
+
+**"adb: no devices/emulators found"**
+- Wait 30-60 seconds for the emulator to fully boot
+- Run `adb devices` to check status
+- If still offline, try restarting ADB: `adb kill-server && adb start-server`
+
+**"command not found: emulator"**
+- Add Android SDK to your PATH:
+  ```bash
+  export ANDROID_HOME=$HOME/Library/Android/sdk
+  export PATH=$PATH:$ANDROID_HOME/emulator
+  export PATH=$PATH:$ANDROID_HOME/platform-tools
+  ```
+- Or use the full path: `/Users/dmeghwal/Library/Android/sdk/emulator/emulator`
+
+**Create a new emulator (if needed):**
+```bash
+# List available system images
+sdkmanager --list | grep system-images
+
+# Download a system image (example: API 34 with Google Play)
+sdkmanager "system-images;android-34;google_apis_playstore;arm64-v8a"
+
+# Create AVD
+avdmanager create avd -n MyEmulator -k "system-images;android-34;google_apis_playstore;arm64-v8a"
 ```
 
 ### Option 3: Install APK Directly
