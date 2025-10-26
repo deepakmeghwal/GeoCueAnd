@@ -33,7 +33,18 @@ class GeofenceEventReceiver : BroadcastReceiver() {
                 val geofences = repository.getGeofences().associateBy { it.id.toString() }
                 event.triggeringGeofences?.forEach { geofence ->
                     geofences[geofence.requestId]?.let { location ->
-                        notificationManager.notifyEvent(location, transition)
+                        // Only send notification if the location is enabled
+                        if (!location.isEnabled) return@let
+                        
+                        // Check if we should notify based on transition type
+                        val shouldNotify = when (transition) {
+                            GeofenceTransition.ENTRY -> location.notifyOnEntry
+                            GeofenceTransition.EXIT -> location.notifyOnExit
+                        }
+                        
+                        if (shouldNotify) {
+                            notificationManager.notifyEvent(location, transition)
+                        }
                     }
                 }
             }
