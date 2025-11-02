@@ -3,6 +3,7 @@ package com.geocue.android.ui.home
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -46,8 +47,10 @@ import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
+ 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -116,7 +119,7 @@ fun AddReminderSheet(
 
             MapPreview(state = state, onSelectCoordinates = onSelectCoordinates)
             Text(
-                text = "Long-press the map to drop a pin.",
+                text = "Tap or long-press the map to drop a pin.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -306,22 +309,34 @@ private fun MapPreview(
         shape = MaterialTheme.shapes.medium,
         tonalElevation = 2.dp
     ) {
-        GoogleMap(
-            cameraPositionState = cameraPositionState,
-            properties = MapProperties(isMyLocationEnabled = false),
-            onMapLongClick = { latLng -> onSelectCoordinates(latLng.latitude, latLng.longitude) }
-        ) {
-            state.selectedLocation?.let { selection ->
-                val center = LatLng(selection.latitude, selection.longitude)
-                Marker(state = rememberMarkerState(position = center), title = selection.name)
-                Circle(
-                    center = center,
-                    radius = state.radius.toDouble(),
-                    fillColor = Color(0x332196F3),
-                    strokeColor = Color(0xFF2196F3.toInt()),
-                    strokeWidth = 2f
-                )
+        Box(modifier = Modifier.fillMaxWidth()) {
+            GoogleMap(
+                cameraPositionState = cameraPositionState,
+                properties = MapProperties(isMyLocationEnabled = false),
+                onMapClick = { latLng -> onSelectCoordinates(latLng.latitude, latLng.longitude) },
+            onMapLongClick = { latLng -> onSelectCoordinates(latLng.latitude, latLng.longitude) },
+            onPOIClick = { poi -> onSelectCoordinates(poi.latLng.latitude, poi.latLng.longitude) }
+            ) {
+                state.selectedLocation?.let { selection ->
+                    val center = LatLng(selection.latitude, selection.longitude)
+                    val markerState = androidx.compose.runtime.remember(selection.latitude, selection.longitude) {
+                        MarkerState(position = center)
+                    }
+                    Marker(
+                        state = markerState,
+                        title = selection.name
+                    )
+                    Circle(
+                        center = center,
+                        radius = state.radius.toDouble(),
+                        fillColor = Color(0x332196F3),
+                        strokeColor = Color(0xFF2196F3.toInt()),
+                        strokeWidth = 2f
+                    )
+                }
             }
+
+            
         }
     }
 }
