@@ -11,8 +11,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.Collections
-import java.util.concurrent.ConcurrentHashMap
 
 @AndroidEntryPoint
 class GeofenceEventReceiver : BroadcastReceiver() {
@@ -20,45 +18,32 @@ class GeofenceEventReceiver : BroadcastReceiver() {
     @Inject lateinit var repository: GeofenceRepository
     @Inject lateinit var notificationManager: GeofenceNotificationManager
 
-    companion object {
-        // Track locations where we've delivered a DWELL notification to allow EXIT only after dwell
-        private val dwelledLocationIds: MutableSet<String> =
-            Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
-    }
-
     override fun onReceive(context: Context, intent: Intent) {
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             runCatching {
                 val event = GeofencingEvent.fromIntent(intent) ?: return@runCatching
                 if (event.hasError()) return@runCatching
+                val transition = when (event.geofenceTransition) {
+                    Geofence.GEOFENCE_TRANSITION_ENTER -> GeofenceTransition.ENTRY
+                    Geofence.GEOFENCE_TRANSITION_EXIT -> GeofenceTransition.EXIT
+                    else -> return@runCatching
+                }
+
                 val geofences = repository.getGeofences().associateBy { it.id.toString() }
                 event.triggeringGeofences?.forEach { geofence ->
                     geofences[geofence.requestId]?.let { location ->
                         // Only send notification if the location is enabled
                         if (!location.isEnabled) return@let
-
-                        when (event.geofenceTransition) {
-                            Geofence.GEOFENCE_TRANSITION_DWELL -> {
-                                if (location.notifyOnEntry) {
-                                    // Treat DWELL as a matured ENTRY and notify
-                                    notificationManager.notifyEvent(location, GeofenceTransition.ENTRY)
-                                }
-                                dwelledLocationIds.add(location.id.toString())
-                            }
-                            Geofence.GEOFENCE_TRANSITION_EXIT -> {
-                                // Only notify EXIT if we previously dwelled inside this location
-                                val hadDwelled = dwelledLocationIds.remove(location.id.toString())
-                                if (hadDwelled && location.notifyOnExit) {
-                                    notificationManager.notifyEvent(location, GeofenceTransition.EXIT)
-                                }
-                            }
-                            Geofence.GEOFENCE_TRANSITION_ENTER -> {
-                                // Ignore raw ENTER to avoid drive-by notifications
-                            }
-                            else -> {
-                                // Ignore other transitions
-                            }
+                        
+                        // Check if we should notify based on transition type
+                        val shouldNotify = when (transition) {
+                            GeofenceTransition.ENTRY -> location.notifyOnEntry
+                            GeofenceTransition.EXIT -> location.notifyOnExit
+                        }
+                        
+                        if (shouldNotify) {
+                            notificationManager.notifyEvent(location, transition)
                         }
                     }
                 }
