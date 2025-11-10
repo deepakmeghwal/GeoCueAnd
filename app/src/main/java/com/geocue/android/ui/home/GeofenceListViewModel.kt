@@ -55,8 +55,8 @@ class GeofenceListViewModel @Inject constructor(
                     locationClient.observeLocationUpdates()
                         .collect { location ->
                             // Update last known location for UI display
-                            _lastKnownLocation.value = location
-                        }
+                        _lastKnownLocation.value = location
+                    }
                 }
             }
         }
@@ -97,23 +97,34 @@ class GeofenceListViewModel @Inject constructor(
     fun addReminder(request: CreateGeofenceRequest) {
         viewModelScope.launch {
             if (!permissionChecker.hasLocationPermission()) return@launch
-            val baseLocation = request.location ?: locationClient.getCurrentLocation()
-            if (baseLocation != null) {
-                val geofenceLocation = GeofenceLocation(
-                    name = request.name,
-                    address = request.address,
-                    latitude = request.latitude ?: baseLocation.latitude,
-                    longitude = request.longitude ?: baseLocation.longitude,
-                    radius = request.radius,
-                    entryMessage = request.entryMessage,
-                    exitMessage = request.exitMessage,
-                    notifyOnEntry = request.notifyOnEntry,
-                    notifyOnExit = request.notifyOnExit,
-                    notificationMode = request.notificationMode,
-                    isEnabled = true
-                )
-                interactor.add(geofenceLocation)
+
+            val latitude: Double
+            val longitude: Double
+
+            if (request.latitude != null && request.longitude != null) {
+                latitude = request.latitude
+                longitude = request.longitude
+            } else {
+                val baseLocation = request.location ?: locationClient.getCurrentLocation()
+                if (baseLocation == null) return@launch
+                latitude = baseLocation.latitude
+                longitude = baseLocation.longitude
             }
+
+            val geofenceLocation = GeofenceLocation(
+                name = request.name,
+                address = request.address,
+                latitude = latitude,
+                longitude = longitude,
+                radius = request.radius,
+                entryMessage = request.entryMessage,
+                exitMessage = request.exitMessage,
+                notifyOnEntry = request.notifyOnEntry,
+                notifyOnExit = request.notifyOnExit,
+                notificationMode = request.notificationMode,
+                isEnabled = true
+            )
+            interactor.add(geofenceLocation)
         }
     }
 }
